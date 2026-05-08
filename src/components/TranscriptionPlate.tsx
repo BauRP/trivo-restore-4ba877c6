@@ -5,7 +5,7 @@
 import { useState } from "react";
 import { Languages, Loader2, RotateCcw } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
-import { transcribeAudio } from "@/server/transcribe.functions";
+import { transcribeAudio } from "@/lib/server/transcribe.functions";
 import { cacheTranscription, getCachedTranscription } from "@/lib/stt-cache";
 
 interface Props {
