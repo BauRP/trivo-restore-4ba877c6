@@ -1,4 +1,4 @@
-import { translateText } from "@/lib/server/translate.functions";
+import { translateText } from "@/lib/translate.functions";
 
 interface CacheEntry {
   translated?: string;
