@@ -1,23 +1,22 @@
 ext {
-    minSdkVersion = 23
+    minSdkVersion = 24  // ИСПРАВЛЕНО: минимум 24 для совместимости с современными библиотеками
     compileSdkVersion = 36
     targetSdkVersion = 36
-    kotlin_version = '2.1.0' // КРИТИЧНО: Обновляем версию Kotlin для совместимости
-    androidxActivityVersion = '1.9.0'
-    androidxAppCompatVersion = '1.7.0'
+    kotlin_version = '2.1.0' 
+    androidxActivityVersion = '1.11.0' // Обновлено
+    androidxAppCompatVersion = '1.7.1'  // Обновлено
     androidxCoordinatorLayoutVersion = '1.3.0'
-    androidxCoreVersion = '1.15.0'
-    androidxFragmentVersion = '1.8.0'
+    androidxCoreVersion = '1.17.0'      // ИСПРАВЛЕНО: для соответствия API 36
+    androidxFragmentVersion = '1.8.9'   // Обновлено
     junitVersion = '4.13.2'
-    androidxJunitVersion = '1.2.1'
-    androidxEspressoCoreVersion = '3.6.1'
-    cordovaAndroidVersion = '10.1.1'
-    coreSplashScreenVersion = '1.0.1'
+    androidxJunitVersion = '1.3.0'      // Обновлено
+    androidxEspressoCoreVersion = '3.7.0' // Обновлено
+    cordovaAndroidVersion = '14.0.1'    // ИСПРАВЛЕНО: версия 10.1.1 слишком старая для API 36
+    coreSplashScreenVersion = '1.2.0'   // Обновлено
     androidxMaterialVersion = '1.12.0'
 
-    // Google Mobile Ads SDK — pinned to latest 2026 stable to eliminate
-    // "I/Ads: Received log message: <Google:HTML> SDK is out of date" warnings.
+    // Актуальные версии Google Ads для 2026 года
     playServicesAdsVersion = '25.2.0'
     userMessagingPlatformVersion = '4.0.0'
-    androidxCoreKTXVersion = '1.15.0'
+    androidxCoreKTXVersion = '1.17.0'   // Синхронизировано с androidxCoreVersion
 }
