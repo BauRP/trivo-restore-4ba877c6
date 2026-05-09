@@ -1,7 +1,7 @@
 import { ArrowLeft, FileText, Check, CheckCheck, Phone, Video, Flag, Download, Clock, ShieldAlert, Search, Pin, X, CornerUpLeft, Languages, BellOff, MoreVertical, TimerReset, Eye } from "lucide-react";
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import EmojiPicker from "emoji-picker-react";
+import CustomEmojiPicker from "./CustomEmojiPicker";
 import { Share } from "@capacitor/share";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -1498,15 +1498,20 @@ const ChatRoom = ({ chatId, name, emoji, onBack }: ChatRoomProps) => {
             exit={{ height: 0 }}
             className="overflow-hidden trivo-emoji-picker"
           >
-            <EmojiPicker
-              onEmojiClick={(e) => setInput((prev) => prev + e.emoji)}
-              width="100%"
+            <CustomEmojiPicker
               height={320}
-              theme={theme as any}
-              searchDisabled
-              skinTonesDisabled
-              previewConfig={{ showPreview: false }}
-              lazyLoadEmojis
+              onSelect={(emoji) => setInput((prev) => prev + emoji)}
+              onBackspace={() =>
+                setInput((prev) => {
+                  if (!prev) return prev;
+                  // Remove last grapheme (handles emoji + ZWJ sequences)
+                  const seg = (Intl as any).Segmenter
+                    ? Array.from(new (Intl as any).Segmenter().segment(prev), (s: any) => s.segment)
+                    : Array.from(prev);
+                  seg.pop();
+                  return seg.join("");
+                })
+              }
             />
           </motion.div>
         )}
