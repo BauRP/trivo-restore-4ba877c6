@@ -1,5 +1,8 @@
-import { createRouter, useRouter } from "@tanstack/react-router";
+import { createRouter, useRouter, createHashHistory } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+
+// Создаем историю на основе хэша (#), чтобы Android видел все страницы мессенджера
+const hashHistory = typeof window !== 'undefined' ? createHashHistory() : undefined;
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -57,6 +60,8 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
 export const getRouter = () => {
   const router = createRouter({
     routeTree,
+    // Господин, мы добавили эту строку. Она убирает белый экран в APK.
+    history: hashHistory,
     context: {},
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
