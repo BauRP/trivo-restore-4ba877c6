@@ -25,39 +25,36 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
-        # Господин, устанавливаем всё: от базы данных до инструментов сборки
+        # Устанавливаем всё необходимое для работы сервера и мессенджера
         run: npm install
 
       - name: Build Web Assets
-        # Сохраняем все серверные и клиентские файлы без потерь
+        # Сохраняем все серверные и клиентские файлы в папку dist для Capacitor
         run: |
           npm run build
-          # Если папки dist нет, создаем её (не удаляя существующее)
           mkdir -p dist
-          # Копируем результаты сборки TanStack Start
           if [ -d ".output/public" ]; then
             cp -r .output/public/* dist/
           fi
-          
-          # Проверка на наличие главного файла, чтобы APK не был пустым
+          # Проверка на наличие главного файла
           if [ ! -f "dist/index.html" ] && [ -f ".output/public/index.html" ]; then
             cp .output/public/index.html dist/index.html
           fi
 
       - name: Sync Capacitor Android
-        # Теперь команда сработает, так как мы обновили package.json
         run: npx cap sync android
 
       - name: Build Android APK
+        # Собираем APK со всеми включенными функциями
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew clean
           ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Trivo-Chat-Elite-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          # Исправленный путь: ищем любые собранные APK в папке вывода
+          path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 7
