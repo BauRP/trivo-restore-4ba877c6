@@ -106,8 +106,16 @@ const ChatRow = ({
         onDragEnd={handleDragEnd}
         className="relative"
       >
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={onOpen}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              onOpen();
+            }
+          }}
           className="w-full flex items-center gap-3 p-3 rounded-xl glass-panel-sm hover:neon-border transition-all text-left bg-background"
         >
           <DefaultAvatar src={chat.avatar} size={48} />
@@ -161,7 +169,7 @@ const ChatRow = ({
           >
             <MoreVertical size={16} />
           </button>
-        </button>
+        </div>
       </motion.div>
 
       <AnimatePresence>
