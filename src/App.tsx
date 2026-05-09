@@ -12,12 +12,6 @@ import gun from "@/lib/gun-setup";
 
 const queryClient = new QueryClient();
 
-// Список ваших серверов (добавьте сюда остальные из ваших 30 узлов)
-const peers = [
-  'https://gun-manhattan.herokuapp.com/gun',
-  'http://localhost:8765/gun'
-];
-
 const App = () => {
   useEffect(() => {
     // Логика Бота: Слушаем входящие сообщения
