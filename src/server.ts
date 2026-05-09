@@ -1,5 +1,5 @@
-import { createRequestHandler } from "@tanstack/start/server";
+import { createRequestHandler } from "@tanstack/react-start/server";
 
-// Этот обработчик отвечает за всю логику мессенджера на стороне сервера
-// (маршрутизация, работа с базой Supabase, API запросы)
+// Господин, этот обработчик обеспечивает работу всей серверной логики:
+// маршрутизацию, запросы к базе данных Supabase и API мессенджера.
 export default createRequestHandler();
