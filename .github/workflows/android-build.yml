@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup Java 21
+      - name: Setup Java 21 (Zulu)
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -25,23 +25,27 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
+        # Господин, устанавливаем всё: от базы данных до инструментов сборки
         run: npm install
 
       - name: Build Web Assets
+        # Сохраняем все серверные и клиентские файлы без потерь
         run: |
           npm run build
-          rm -rf dist
+          # Если папки dist нет, создаем её (не удаляя существующее)
           mkdir -p dist
-          # Копируем всё из папок сборки (поддерживаем TanStack/Vite)
-          [ -d ".output/public" ] && cp -r .output/public/* dist/ || true
-          [ -d "dist/client" ] && cp -r dist/client/* dist/ || true
+          # Копируем результаты сборки TanStack Start
+          if [ -d ".output/public" ]; then
+            cp -r .output/public/* dist/
+          fi
           
-          # Генерируем index.html если он отсутствует (критично для мессенджера)
-          if [ ! -f "dist/index.html" ]; then
-            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > dist/index.html
+          # Проверка на наличие главного файла, чтобы APK не был пустым
+          if [ ! -f "dist/index.html" ] && [ -f ".output/public/index.html" ]; then
+            cp .output/public/index.html dist/index.html
           fi
 
       - name: Sync Capacitor Android
+        # Теперь команда сработает, так как мы обновили package.json
         run: npx cap sync android
 
       - name: Build Android APK
@@ -54,6 +58,6 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Trivo-Messenger-Debug-APK
+          name: Trivo-Chat-Elite-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 7
