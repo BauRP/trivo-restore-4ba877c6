@@ -1,5 +1,4 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,9 +7,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { IdentityProvider } from "@/contexts/IdentityContext";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index.tsx";
-import NotFound from "./pages/NotFound.tsx";
 import { useEffect } from "react";
-import Gun from "gun";
+import gun from "@/lib/gun-setup";
 
 const queryClient = new QueryClient();
 
@@ -22,9 +20,6 @@ const peers = [
 
 const App = () => {
   useEffect(() => {
-    // Инициализация GunDB при запуске приложения
-    const gun = Gun({ peers });
-    
     // Логика Бота: Слушаем входящие сообщения
     gun.get('trivo-chat-messages').map().once((data, id) => {
       if (data && data.text && data.sender !== 'TrivoBot') {
@@ -52,12 +47,7 @@ const App = () => {
               <TooltipProvider>
                 <Toaster />
                 <Sonner />
-                <BrowserRouter>
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </BrowserRouter>
+                <Index />
               </TooltipProvider>
             </IdentityProvider>
           </LanguageProvider>
