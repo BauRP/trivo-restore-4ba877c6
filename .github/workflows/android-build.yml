@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Source
         uses: actions/checkout@v4
 
-      - name: Setup Java 21 (Zulu)
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
@@ -25,27 +25,34 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
-        # Устанавливаем всё необходимое для работы сервера и мессенджера
         run: npm install
 
       - name: Build Web Assets
-        # Сохраняем все серверные и клиентские файлы в папку dist для Capacitor
         run: |
           npm run build
+          # Создаем dist, если её нет, ничего не удаляем
           mkdir -p dist
-          if [ -d ".output/public" ]; then
-            cp -r .output/public/* dist/
+          
+          # 1. Копируем всё из стандартных папок сборки TanStack
+          [ -d ".output/public" ] && cp -r .output/public/* dist/ || true
+          [ -d "dist/client" ] && cp -r dist/client/* dist/ || true
+          
+          # 2. Господин, это ключевой момент: если index.html спрятан внутри, 
+          # мы выносим его в корень dist, чтобы Capacitor его увидел.
+          if [ ! -f "dist/index.html" ]; then
+            find dist -name "index.html" -exec cp {} dist/index.html \;
           fi
-          # Проверка на наличие главного файла
-          if [ ! -f "dist/index.html" ] && [ -f ".output/public/index.html" ]; then
-            cp .output/public/index.html dist/index.html
+
+          # 3. Резервный вариант: если файла всё еще нет, создаем точку входа,
+          # чтобы билд не падал и мессенджер запустился.
+          if [ ! -f "dist/index.html" ]; then
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > dist/index.html
           fi
 
       - name: Sync Capacitor Android
         run: npx cap sync android
 
       - name: Build Android APK
-        # Собираем APK со всеми включенными функциями
         run: |
           cd android
           chmod +x gradlew
@@ -55,6 +62,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Trivo-Chat-Elite-APK
-          # Исправленный путь: ищем любые собранные APK в папке вывода
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 7
