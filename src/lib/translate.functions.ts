@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { translateTextServer } from "./server/translate.server";
 
 const InputSchema = z.object({
   text: z.string().min(1).max(8000),
@@ -10,4 +9,7 @@ const InputSchema = z.object({
 
 export const translateText = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => InputSchema.parse(data))
-  .handler(async ({ data }) => translateTextServer(data));
+  .handler(async ({ data }) => {
+    const { translateTextServer } = await import("./server/translate.server");
+    return translateTextServer(data);
+  });
