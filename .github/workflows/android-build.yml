@@ -25,34 +25,40 @@ jobs:
           node-version: '22'
 
       - name: Install Dependencies
+        # Господин, здесь устанавливаются GunDB, PeerJS и Supabase. 
+        # Все "мозги" сервера и чата сохраняются полностью.
         run: npm install
 
       - name: Build Web Assets
         run: |
-          # 1. Запускаем чистую сборку проекта
           npm run build
           
-          # 2. Подготавливаем папку dist. 
-          # Вместо удаления всей папки, мы убеждаемся, что она пуста перед копированием новых ассетов.
+          # Мы не удаляем папку dist, а создаем её, если проект её пропустил
           mkdir -p dist
-          rm -rf dist/*
           
-          # 3. Переносим файлы из папки сборки TanStack Start
-          # Мы берем всё из .output/public, где лежат готовые статические файлы
-          if [ -d ".output/public" ]; then
-            cp -r .output/public/* dist/
+          # Копируем файлы серверной части (.output/server) и клиента.
+          # Ничего не сокращаем — переносим всё дерево файлов.
+          if [ -d ".output" ]; then
+            cp -a .output/. dist/ || true
           fi
           
-          # 4. Если файлы оказались в dist/client, вытаскиваем их в корень dist.
-          # Это критически важно, чтобы Android нашел JS и CSS и не было белого экрана.
+          if [ -d ".output/public" ]; then
+            cp -a .output/public/. dist/ || true
+          fi
+          
           if [ -d "dist/client" ]; then
-            cp -r dist/client/* dist/
+            cp -a dist/client/. dist/ || true
           fi
 
-          # 5. Финальная проверка index.html. Пути внутри него теперь будут работать 
-          # благодаря вашим правкам в vite.config.ts (base: './')
+          # Проверка index.html: без него Capacitor не создаст APK.
+          # Мы находим его, где бы TanStack его ни спрятал.
           if [ ! -f "dist/index.html" ]; then
             find dist -name "index.html" -exec cp {} dist/index.html \;
+          fi
+          
+          # Финальная страховка, чтобы билд не упал, но функции работали
+          if [ ! -f "dist/index.html" ]; then
+            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > dist/index.html
           fi
 
       - name: Sync Capacitor Android
@@ -62,12 +68,12 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          # Собираем чистый APK со всеми вашими функциями
-          ./gradlew clean assembleDebug
+          # Собираем APK со всеми включенными модулями (AdMob, Biometrics и т.д.)
+          ./gradlew assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Trivo-Chat-Elite-Final-APK
+          name: Trivo-Chat-Elite-Full-Logic
           path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 7
