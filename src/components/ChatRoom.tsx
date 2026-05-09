@@ -1,7 +1,7 @@
 import { ArrowLeft, FileText, Check, CheckCheck, Phone, Video, Flag, Download, Clock, ShieldAlert, Search, Pin, X, CornerUpLeft, Languages, BellOff, MoreVertical, TimerReset, Eye } from "lucide-react";
 import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import EmojiPicker from "emoji-picker-react";
+import CustomEmojiPicker from "./CustomEmojiPicker";
 import { Share } from "@capacitor/share";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
