@@ -1498,15 +1498,20 @@ const ChatRoom = ({ chatId, name, emoji, onBack }: ChatRoomProps) => {
             exit={{ height: 0 }}
             className="overflow-hidden trivo-emoji-picker"
           >
-            <EmojiPicker
-              onEmojiClick={(e) => setInput((prev) => prev + e.emoji)}
-              width="100%"
+            <CustomEmojiPicker
               height={320}
-              theme={theme as any}
-              searchDisabled
-              skinTonesDisabled
-              previewConfig={{ showPreview: false }}
-              lazyLoadEmojis
+              onSelect={(emoji) => setInput((prev) => prev + emoji)}
+              onBackspace={() =>
+                setInput((prev) => {
+                  if (!prev) return prev;
+                  // Remove last grapheme (handles emoji + ZWJ sequences)
+                  const seg = (Intl as any).Segmenter
+                    ? Array.from(new (Intl as any).Segmenter().segment(prev), (s: any) => s.segment)
+                    : Array.from(prev);
+                  seg.pop();
+                  return seg.join("");
+                })
+              }
             />
           </motion.div>
         )}
