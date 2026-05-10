@@ -31,35 +31,40 @@ jobs:
 
       - name: Build Web Assets
         run: |
+          # Полная сборка TanStack Start (клиент + воркер).
+          # Воркер не используется в APK, но билд эмитит и статический клиент.
           npm run build
-          
-          # Мы не удаляем папку dist, а создаем её, если проект её пропустил
+
+          # Готовим чистую папку dist для Capacitor (webDir: "dist").
+          rm -rf dist
           mkdir -p dist
-          
-          # Копируем файлы серверной части (.output/server) и клиента.
-          # Ничего не сокращаем — переносим всё дерево файлов.
-          if [ -d ".output" ]; then
-            cp -a .output/. dist/ || true
-          fi
-          
-          if [ -d ".output/public" ]; then
-            cp -a .output/public/. dist/ || true
-          fi
-          
-          if [ -d "dist/client" ]; then
-            cp -a dist/client/. dist/ || true
+
+          # Приоритетный источник статических ассетов — .output/public
+          # (TanStack Start кладёт сюда index.html + /assets со всеми JS/CSS).
+          if [ -d ".output/public" ] && [ "$(ls -A .output/public)" ]; then
+            cp -a .output/public/. dist/
+          elif [ -d "dist-client" ]; then
+            cp -a dist-client/. dist/
+          else
+            # Резерв: ищем любой index.html, появившийся после билда,
+            # и забираем его директорию целиком.
+            CANDIDATE="$(find .output dist-client -name index.html -print -quit 2>/dev/null || true)"
+            if [ -n "$CANDIDATE" ]; then
+              cp -a "$(dirname "$CANDIDATE")/." dist/
+            fi
           fi
 
-          # Проверка index.html: без него Capacitor не создаст APK.
-          # Мы находим его, где бы TanStack его ни спрятал.
+          # Жёсткая проверка: без index.html Capacitor покажет белый экран.
           if [ ! -f "dist/index.html" ]; then
-            find dist -name "index.html" -exec cp {} dist/index.html \;
+            echo "::error::dist/index.html not found after build — Capacitor would render a white screen."
+            echo "Build output tree for debugging:"
+            ls -la .output 2>/dev/null || true
+            ls -la .output/public 2>/dev/null || true
+            exit 1
           fi
-          
-          # Финальная страховка, чтобы билд не упал, но функции работали
-          if [ ! -f "dist/index.html" ]; then
-            echo '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' > dist/index.html
-          fi
+
+          echo "Capacitor web root prepared:"
+          ls -la dist | head -40
 
       - name: Sync Capacitor Android
         run: npx cap sync android
