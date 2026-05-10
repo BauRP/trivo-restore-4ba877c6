@@ -1,11 +1,3 @@
-import { createRequestHandler } from "@tanstack/react-start/server";
-import { getRouter } from "./router";
-
-// Cloudflare Worker entry. TanStack Start выполняет SSR здесь,
-// а статический клиент используется в Capacitor APK.
-export default {
-  async fetch(request: Request) {
-    const handler = createRequestHandler({ request, createRouter: getRouter });
-    return handler();
-  },
-};
+// Cloudflare Worker entry. Делегируем стандартному обработчику TanStack Start.
+// SSR/RPC сохраняются полностью; в APK используется только статический клиент.
+export { default } from "@tanstack/react-start/server-entry";
