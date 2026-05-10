@@ -1,8 +1,14 @@
 import { createRouter, useRouter, createHashHistory } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
-// Создаем историю на основе хэша (#), чтобы Android видел все страницы мессенджера
-const hashHistory = typeof window !== 'undefined' ? createHashHistory() : undefined;
+// Hash history ТОЛЬКО для нативного Capacitor (Android/iOS WebView).
+// В вебе/SSR оставляем стандартную browser history, иначе ломается превью и SEO.
+function isNativeCapacitor(): boolean {
+  if (typeof window === "undefined") return false;
+  const cap = (window as any).Capacitor;
+  return !!(cap && (typeof cap.isNativePlatform === "function" ? cap.isNativePlatform() : cap.isNative));
+}
+const hashHistory = isNativeCapacitor() ? createHashHistory() : undefined;
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -60,8 +66,8 @@ function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => vo
 export const getRouter = () => {
   const router = createRouter({
     routeTree,
-    // Господин, мы добавили эту строку. Она убирает белый экран в APK.
-    history: hashHistory,
+    // Hash history активна только в нативном APK (Capacitor WebView).
+    ...(hashHistory ? { history: hashHistory } : {}),
     context: {},
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
