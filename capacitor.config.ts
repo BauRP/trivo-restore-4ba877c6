@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appId: "com.trivo.chat.elite",
   // Название, которое будет отображаться на телефоне
   appName: "Trivo Chat Elite",
-  // Папка, в которую собирается проект (не меняем, чтобы ничего не забыть)
-  webDir: "dist",
+  // Native TanStack Start static output consumed directly by Capacitor.
+  webDir: ".output/public",
   server: {
     androidScheme: "https",
     // Добавляем, чтобы серверная часть и база данных могли работать без сбоев

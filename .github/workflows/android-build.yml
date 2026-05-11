@@ -35,32 +35,18 @@ jobs:
           # Воркер не используется в APK, но билд эмитит и статический клиент.
           npm run build
 
-          # TanStack Start emits the static client into .output/public, while
-          # Capacitor reads web assets from ./dist (webDir: "dist"). Move the
-          # exact emitted web root into dist so the Android build never sees an
-          # empty or stale folder.
+      - name: Validate Capacitor Web Assets
+        run: |
           if [ ! -f ".output/public/index.html" ]; then
-            echo "::error::.output/public/index.html not found after npm run build — cannot prepare Capacitor web root."
+            echo "::error::Build Asset Missing: .output/public/index.html was not generated. Capacitor webDir is .output/public."
             echo "Build output tree for debugging:"
             ls -la .output 2>/dev/null || true
             ls -la .output/public 2>/dev/null || true
             exit 1
           fi
 
-          rm -rf dist
-          mv .output/public dist
-
-          # Жёсткая проверка: без index.html Capacitor покажет белый экран.
-          if [ ! -f "dist/index.html" ]; then
-            echo "::error::dist/index.html not found after build — Capacitor would render a white screen."
-            echo "Build output tree for debugging:"
-            ls -la .output 2>/dev/null || true
-            ls -la dist 2>/dev/null || true
-            exit 1
-          fi
-
-          echo "Capacitor web root prepared:"
-          ls -la dist | head -40
+          echo "Capacitor web root ready at .output/public:"
+          ls -la .output/public | head -40
 
       - name: Sync Capacitor Android
         run: npx cap sync android
