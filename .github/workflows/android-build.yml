@@ -35,31 +35,27 @@ jobs:
           # Воркер не используется в APK, но билд эмитит и статический клиент.
           npm run build
 
-          # Готовим чистую папку dist для Capacitor (webDir: "dist").
-          rm -rf dist
-          mkdir -p dist
-
-          # Приоритетный источник статических ассетов — .output/public
-          # (TanStack Start кладёт сюда index.html + /assets со всеми JS/CSS).
-          if [ -d ".output/public" ] && [ "$(ls -A .output/public)" ]; then
-            cp -a .output/public/. dist/
-          elif [ -d "dist-client" ]; then
-            cp -a dist-client/. dist/
-          else
-            # Резерв: ищем любой index.html, появившийся после билда,
-            # и забираем его директорию целиком.
-            CANDIDATE="$(find .output dist-client -name index.html -print -quit 2>/dev/null || true)"
-            if [ -n "$CANDIDATE" ]; then
-              cp -a "$(dirname "$CANDIDATE")/." dist/
-            fi
+          # TanStack Start emits the static client into .output/public, while
+          # Capacitor reads web assets from ./dist (webDir: "dist"). Move the
+          # exact emitted web root into dist so the Android build never sees an
+          # empty or stale folder.
+          if [ ! -f ".output/public/index.html" ]; then
+            echo "::error::.output/public/index.html not found after npm run build — cannot prepare Capacitor web root."
+            echo "Build output tree for debugging:"
+            ls -la .output 2>/dev/null || true
+            ls -la .output/public 2>/dev/null || true
+            exit 1
           fi
+
+          rm -rf dist
+          mv .output/public dist
 
           # Жёсткая проверка: без index.html Capacitor покажет белый экран.
           if [ ! -f "dist/index.html" ]; then
             echo "::error::dist/index.html not found after build — Capacitor would render a white screen."
             echo "Build output tree for debugging:"
             ls -la .output 2>/dev/null || true
-            ls -la .output/public 2>/dev/null || true
+            ls -la dist 2>/dev/null || true
             exit 1
           fi
 
