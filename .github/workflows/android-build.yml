@@ -1,4 +1,4 @@
-name: Build Messenger APK
+name: BuilD Messenger APK
 
 on:
   push:
