@@ -1,14 +1,9 @@
 import { createRouter, useRouter, createHashHistory } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 
-// Hash history ТОЛЬКО для нативного Capacitor (Android/iOS WebView).
-// В вебе/SSR оставляем стандартную browser history, иначе ломается превью и SEO.
-function isNativeCapacitor(): boolean {
-  if (typeof window === "undefined") return false;
-  const cap = (window as any).Capacitor;
-  return !!(cap && (typeof cap.isNativePlatform === "function" ? cap.isNativePlatform() : cap.isNative));
-}
-const hashHistory = isNativeCapacitor() ? createHashHistory() : undefined;
+// Static SPA + Capacitor: client navigation must be hash-based so Android
+// WebView never tries to resolve app routes as filesystem/network paths.
+const hashHistory = typeof window !== "undefined" ? createHashHistory() : undefined;
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -69,6 +64,7 @@ export const getRouter = () => {
     // Hash history активна только в нативном APK (Capacitor WebView).
     ...(hashHistory ? { history: hashHistory } : {}),
     context: {},
+    defaultSsr: false,
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
