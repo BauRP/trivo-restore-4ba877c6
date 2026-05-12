@@ -4,6 +4,7 @@ import appCss from "../styles.css?url";
 import legacyCss from "../index.css?url";
 
 export const Route = createRootRoute({
+  ssr: false,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
