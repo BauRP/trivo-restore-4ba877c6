@@ -64,7 +64,6 @@ export const getRouter = () => {
     // Hash history активна только в нативном APK (Capacitor WebView).
     ...(hashHistory ? { history: hashHistory } : {}),
     context: {},
-    defaultSsr: false,
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
