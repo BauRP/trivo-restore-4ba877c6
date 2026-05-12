@@ -34,6 +34,7 @@ jobs:
           # Полная сборка TanStack Start (клиент + воркер).
           # Воркер не используется в APK, но билд эмитит и статический клиент.
           npm run build
+          find . -maxdepth 4 -name index.html -print
 
       - name: Validate Capacitor Web Assets
         run: |
